@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Painter Tool</title>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            touch-action: manipulation;
+            box-sizing: border-box;
+        }
+        
+        body {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            background-color: #f5f5f5;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        a {
+            color: #000;
+            text-decoration: none;
+        }
+        
+        .toolbar {
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .open-errr {
+            position: fixed;
+            top: 0;
+            right: 0;
+            margin: 16px;
+            z-index: 1000;
+        }
+        
+        .open-errr button {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ommenrtyy-rter {
+            z-index: 1000;
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            margin: auto;
+            display: none;
+            margin-top: 20px;
+            justify-content: center;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .onar {
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            margin: 16px;
+        }
+        
+        .hello-reload {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 8px 0;
+            background: rgba(0, 0, 0, 0.02);
+        }
+        
+        .hello-reload::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .hello-reload div {
+            display: flex;
+            align-items: center;
+            margin: auto;
+            width: max-content;
+            padding: 0 8px;
+        }
+        
+        .hello-reload div button {
+            transition: all 0.2s;
+            padding: 16px;
+            margin: 0 4px;
+            border-radius: 50%;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            min-width: 24px;
+            min-height: 24px;
+            flex-shrink: 0;
+        }
+        
+        .ionicon {
+            height: 22px;
+            width: 22px;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+        
+        .zoomenda {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .click-button-div {
+            outline-color: #0f6cf8;
+            background: transparent;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin: 0 2px;
+            font-size: 15px;
+            color: #252525;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .click-button-div:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        
+        .click-button-div:active {
+            background: rgba(0, 0, 0, 0.1);
+            transform: scale(0.95);
+        }
+        
+        .outline {
+            opacity: 0;
+            transition: all 0.2s ease;
+            position: absolute;
+            overflow: hidden;
+            height: 0;
+            width: 0;
+            display: flex;
+            bottom: 50px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            padding: 0;
+            z-index: 40;
+            align-items: center;
+            flex-wrap: wrap;
+            max-width: 300px;
+        }
+        
+        .menu.active {
+            opacity: 1;
+            height: auto;
+            width: auto;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 999;
+            display: none;
+        }
+        
+        .only {
+            display: none;
+        }
+        
+        .toolbar-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .toolbar-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .color-preview {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .size-preview {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: currentColor;
+            margin-right: 8px;
+            position: relative;
+        }
+        
+        .size-preview::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+        
+        select.click-button-div {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding: 0 8px;
+            background: transparent;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            touch-action: none;
+        }
+        
+        #drawing-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+        
+        @media screen and (max-width: 768px) {
+            .only {
+                display: flex;
+            }
+            
+            .ommenrtyy-rter {
+                width: 100%;
+                bottom: 0;
+                top: auto;
+                transform: translateX(-50%) translateY(0);
+                margin-bottom: 0;
+            }
+            
+            .onar {
+                width: 100%;
+        margin: 0;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+        padding-bottom: 30px;
+            }
+            
+            .outline.menu.active {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                right: 0;
+                height: 100%;
+                max-width: 100%;
+                border-radius: 16px 16px 0 0;
+                box-shadow: none;
+                justify-content: center;
+                border: none;
+            }
+            
+            .hello-reload div {
+                padding: 0 16px;
+            }
+            
+            .hello-reload div button {
+                padding: 20px;
+                margin: 0 6px;
+            }
+            body .zoomenda {
+                display: none;
+            }
+        }
+        
+        .col {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+        }
+        
+        /* Animation for buttons */
+        @keyframes buttonClick {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.9); }
+            100% { transform: scale(1); }
+        }
+        
+        .button-click {
+            animation: buttonClick 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <a href="">
+        <div class="toolbar col">
+            <span style="margin-left: 10px;">The Painter</span>
+        </div>
+    </a>
+    
+    <div title="Ctrl + B" class="open-errr toolbar" id="showBtn">
+        <button class="click-button-div">
+            <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
+                <path d="M430.11 347.9c-6.6-6.1-16.3-7.6-24.6-9-11.5-1.9-15.9-4-22.6-10-14.3-12.7-14.3-31.1 0-43.8l30.3-26.9c46.4-41 46.4-108.2 0-149.2-34.2-30.1-80.1-45-127.8-45-55.7 0-113.9 20.3-158.8 60.1-83.5 73.8-83.5 194.7 0 268.5 41.5 36.7 97.5 55 152.9 55.4h1.7c55.4 0 110-17.9 148.8-52.4 14.4-12.7 11.99-36.6.1-47.7z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"/>
+                <circle cx="144" cy="208" r="32"/>
+                <circle cx="152" cy="311" r="32"/>
+                <circle cx="224" cy="144" r="32"/>
+                <circle cx="256" cy="367" r="48"/>
+                <circle cx="328" cy="144" r="32"/>
+            </svg>
+        </button>
+    </div>
+    
+    <div id="canvas-container">
+        <canvas id="drawing-canvas"></canvas>
+    </div>
+    
+    <div id="overlay" class="overlay"></div>
+    
+    <div class="ommenrtyy-rter toolbar box" id="box">
+        <div class="onar">
+            <div class="toolbar-top">
+                <div class="toolbar-actions">
+                    <button onclick="toggleMenu()" class="click-button-div">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
+                            <circle cx="256" cy="256" r="48"/>
+                            <circle cx="256" cy="416" r="48"/>
+                            <circle cx="256" cy="96" r="48"/>
+                        </svg>
+                    </button>
+                    
+                    <div class="color-preview" id="colorPreview" style="background: #000;"></div>
+                    <div class="size-preview" id="sizePreview" style="transform: scale(0.3);"></div>
+                </div>
+                
+                <div class="outline menu toolbar" id="menu">
+                    <button class="click-button-div only" onclick="toggleMenu()">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
+                            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M328 112L184 256l144 144"/>
+                        </svg>
+                    </button>
+                    <button onclick="clearDrawing()" class="click-button-div" title="Clear">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
+                            <path d="M400 148l-21.12-24.57A191.43 191.43 0 00240 64C134 64 48 150 48 256s86 192 192 192a192.09 192.09 0 00181.07-128" fill="none" stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="32"/>
+                            <path d="M464 97.42V208a16 16 0 01-16 16H337.42c-14.26 0-21.4-17.23-11.32-27.31L436.69 86.1C446.77 76 464 83.16 464 97.42z"/>
+                        </svg>
+                    </button>
+                    <button class="click-button-div" id="downloadBtn" title="Download">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
+                            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M416 128L192 384l-96-96"/>
+                        </svg>
+                    </button>
+                    <select class="click-button-div" onchange="setLineWidth(this.value)" title="Brush Size">
+                        <option value="2">2</option>
+                        <option value="4" selected>4</option>
+                        <option value="6">6</option>
+                        <option value="8">8</option>
+                        <option value="10">10</option>
+                        <option value="12">12</option>
+                        <option value="14">14</option>
+                        <option value="16">16</option>
+                        <option value="20">20</option>
+                    </select>
+                    <button class="click-button-div only" onmousedown="startUndo()" onmouseup="stopUndo()" ontouchstart="startUndo()" ontouchend="stopUndo()" title="Undo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
+                            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/>
+                        </svg>
+                    </button>
+                    <button class="click-button-div only" onmousedown="startRedo()" onmouseup="stopRedo()" ontouchstart="startRedo()" ontouchend="stopRedo()" title="Redo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
+                            <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M268 112l144 144-144 144M392 256H100"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <button class="click-button-div" title="Close" onclick="closeBox()" id="closeBtn">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
+                        <path d="M289.94 256l95-95A24 24 0 00351 127l-95 95-95-95a24 24 0 00-34 34l95 95-95 95a24 24 0 1034 34l95-95 95 95a24 24 0 0034-34z"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="hello-reload" id="colorsContainer">
+                <div>
+                    <button onclick="setColor('#000000', this)" style="background: #000000;" title="Black"></button>
+                    <button onclick="setColor('#f12020', this)" style="background: #f12020;" title="Red"></button>
+                    <button onclick="setColor('#0faef8', this)" style="background: #0faef8;" title="Blue"></button>
+                    <button onclick="setColor('#11fd87', this)" style="background: #11fd87;" title="Green"></button>
+                    <button onclick="setColor('#b642fa', this)" style="background: #b642fa;" title="Purple"></button>
+                    <button onclick="setColor('#11f3f3', this)" style="background: #11f3f3;" title="Cyan"></button>
+                    <button onclick="setColor('#ffc011', this)" style="background: #ffc011;" title="Yellow"></button>
+                    <button onclick="setColor('#f262ff', this)" style="background: #f262ff;" title="Pink"></button>
+                    <button onclick="setColor('#e7ff14', this)" style="background: #e7ff14;" title="Lime"></button>
+                    <button onclick="setColor('#ffffff', this)" style="background: #ffffff; border: 1px solid #ccc;" title="White"></button>
+                </div>
+            </div>
+            
+            <div class="zoomenda">
+                <button class="click-button-div" onmousedown="startUndo()" onmouseup="stopUndo()" ontouchstart="startUndo()" ontouchend="stopUndo()" title="Undo">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
+                        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M244 400L100 256l144-144M120 256h292"/>
+                    </svg>
+                </button>
+                <button class="click-button-div" onmousedown="startRedo()" onmouseup="stopRedo()" ontouchstart="startRedo()" ontouchend="stopRedo()" title="Redo">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" viewBox="0 0 512 512">
+                        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="48" d="M268 112l144 144-144 144M392 256H100"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Canvas Drawing Implementation
+        const canvas = document.getElementById('drawing-canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let currentColor = '#000000';
+        let currentLineWidth = 4;
+        let lastX = 0;
+        let lastY = 0;
+        let drawingHistory = [];
+        let historyIndex = -1;
+        
+        // Initialize canvas size
+        function resizeCanvas() {
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            canvas.width = width * devicePixelRatio;
+            canvas.height = height * devicePixelRatio;
+            
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+            
+            ctx.scale(devicePixelRatio, devicePixelRatio);
+            
+            redrawCanvas();
+        }
+        
+        // Redraw canvas from history
+        function redrawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (drawingHistory.length > 0 && historyIndex >= 0) {
+                ctx.putImageData(drawingHistory[historyIndex], 0, 0);
+            }
+        }
+        
+        // Save current canvas state to history
+        function saveState() {
+            // Remove any states after current index (for redo)
+            if (historyIndex < drawingHistory.length - 1) {
+                drawingHistory = drawingHistory.slice(0, historyIndex + 1);
+            }
+            
+            // Limit history to 50 states to prevent memory issues
+            if (drawingHistory.length >= 50) {
+                drawingHistory.shift();
+                historyIndex--;
+            }
+            
+            // Save current state
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            drawingHistory.push(imageData);
+            historyIndex++;
+        }
+        
+        // Start drawing
+        function startDrawing(e) {
+            isDrawing = true;
+            const pos = getPosition(e);
+            lastX = pos.x;
+            lastY = pos.y;
+            
+            // Begin a new path
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentLineWidth;
+            
+            // Save initial state
+            saveState();
+        }
+        
+        // Draw
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            const pos = getPosition(e);
+            const x = pos.x;
+            const y = pos.y;
+            
+            // Draw smooth line
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            
+            lastX = x;
+            lastY = y;
+        }
+        
+        // Stop drawing
+        function stopDrawing() {
+            if (isDrawing) {
+                isDrawing = false;
+                ctx.closePath();
+                // Save final state
+                saveState();
+            }
+        }
+        
+        // Get position from event (mouse or touch)
+        function getPosition(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            let clientX, clientY;
+            
+            if (e.touches) {
+                // Touch event
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                // Mouse event
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            return {
+                x: (clientX - rect.left) * scaleX / (window.devicePixelRatio || 1),
+                y: (clientY - rect.top) * scaleY / (window.devicePixelRatio || 1)
+            };
+        }
+        
+        // Set drawing color
+        function setColor(color, button) {
+            currentColor = color;
+            document.getElementById('colorPreview').style.backgroundColor = color;
+            
+            // Add click animation to button
+            if (button) {
+                button.classList.add('button-click');
+                setTimeout(() => {
+                    button.classList.remove('button-click');
+                }, 300);
+            }
+        }
+        
+        // Set line width
+        function setLineWidth(width) {
+            currentLineWidth = parseInt(width, 10);
+            document.getElementById('sizePreview').style.transform = `scale(${currentLineWidth / 12})`;
+        }
+        
+        // Clear canvas
+        function clearDrawing() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawingHistory = [];
+            historyIndex = -1;
+            saveState();
+        }
+        
+        // Undo last action
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                redrawCanvas();
+                return true;
+            }
+            return false;
+        }
+        
+        // Redo last undone action
+        function redo() {
+            if (historyIndex < drawingHistory.length - 1) {
+                historyIndex++;
+                redrawCanvas();
+                return true;
+            }
+            return false;
+        }
+        
+        // Continuous undo/redo
+        let undoInterval;
+        let redoInterval;
+        
+        function startUndo() {
+            undo();
+            undoInterval = setInterval(undo, 100);
+        }
+        
+        function stopUndo() {
+            clearInterval(undoInterval);
+        }
+        
+        function startRedo() {
+            redo();
+            redoInterval = setInterval(redo, 100);
+        }
+        
+        function stopRedo() {
+            clearInterval(redoInterval);
+        }
+        
+        // Download canvas as image
+        function downloadCanvas() {
+            const link = document.createElement('a');
+            link.download = 'drawing.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // Toolbar toggle functions
+        const menu = document.getElementById("menu");
+        const showBtn = document.getElementById('showBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const box = document.getElementById('box');
+        const overlay = document.getElementById('overlay');
+        const colorsContainer = document.getElementById('colorsContainer');
+        
+        function toggleMenu() {
+            menu.classList.toggle("active");
+        }
+        
+        function toggleBox() {
+            if (box.style.display === 'none' || box.style.display === '') {
+                box.style.display = 'flex';
+                overlay.style.display = 'block';
+                showBtn.style.display = 'none';
+            } else {
+                box.style.display = 'none';
+                overlay.style.display = 'none';
+                showBtn.style.display = 'flex';
+            }
+        }
+        
+        function closeBox() {
+            box.style.display = 'none';
+            overlay.style.display = 'none';
+            showBtn.style.display = 'flex';
+            menu.classList.remove("active");
+        }
+        
+        // Enable horizontal scrolling for colors on touch devices
+        let isScrolling = false;
+        let startX = 0;
+        let scrollLeft = 0;
+        
+        colorsContainer.addEventListener('touchstart', (e) => {
+            isScrolling = true;
+            startX = e.touches[0].pageX - colorsContainer.offsetLeft;
+            scrollLeft = colorsContainer.scrollLeft;
+        });
+        
+        colorsContainer.addEventListener('touchmove', (e) => {
+            if (!isScrolling) return;
+            e.preventDefault();
+            const x = e.touches[0].pageX - colorsContainer.offsetLeft;
+            const walk = (x - startX) * 2;
+            colorsContainer.scrollLeft = scrollLeft - walk;
+        });
+        
+        colorsContainer.addEventListener('touchend', () => {
+            isScrolling = false;
+        });
+        
+        // Event listeners
+        function initEventListeners() {
+            // Canvas events
+            canvas.addEventListener('mousedown', startDrawing);
+            canvas.addEventListener('mousemove', draw);
+            canvas.addEventListener('mouseup', stopDrawing);
+            canvas.addEventListener('mouseout', stopDrawing);
+            
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                startDrawing(e);
+            });
+            
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                draw(e);
+            });
+            
+            canvas.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                stopDrawing();
+            });
+            
+            // Toolbar events
+            showBtn.addEventListener('click', toggleBox);
+            closeBtn.addEventListener('click', closeBox);
+            overlay.addEventListener('click', closeBox);
+            
+            document.getElementById('downloadBtn').addEventListener('click', downloadCanvas);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Ctrl+Z for undo
+                if (e.ctrlKey && e.key === 'z') {
+                    e.preventDefault();
+                    undo();
+                }
+                
+                // Ctrl+Y for redo
+                if (e.ctrlKey && e.key === 'y') {
+                    e.preventDefault();
+                    redo();
+                }
+                
+                // Ctrl+B to toggle toolbar
+                if (e.ctrlKey && e.key.toLowerCase() === 'b') {
+                    e.preventDefault();
+                    toggleBox();
+                }
+                
+                // Escape to close toolbar
+                if (e.key === 'Escape') {
+                    closeBox();
+                }
+            });
+            
+            // Window resize
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+            });
+        }
+        
+        // Initialize
+        function init() {
+            resizeCanvas();
+            initEventListeners();
+            setLineWidth(currentLineWidth); // Initialize size preview
+            setColor(currentColor); // Initialize color preview
+        }
+        
+        // Start the app
+        init();
+    </script>
+</body>
+</html>
