@@ -1,0 +1,38 @@
+(function () {
+  const fileURL = "https://tybascript1234.github.io/Languag/calculator.html"; // عدّل هذا ليشير لملف الآلة الحاسبة
+
+  // تحميل ملف HTML من GitHub
+  fetch(fileURL)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to load the file");
+      }
+      return response.text();
+    })
+    .then((content) => {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = content;
+
+      const scripts = tempDiv.querySelectorAll("script");
+      const bodyContent = tempDiv.querySelector("body")?.innerHTML || content;
+
+      const targetContainer = document.getElementById("apps12345");
+      if (targetContainer) {
+        targetContainer.innerHTML = bodyContent;
+      } else {
+        console.warn("Div with id 'apps12345' not found.");
+      }
+
+      // تشغيل السكربتات داخل المحتوى المحمّل
+      scripts.forEach((script) => {
+        const newScript = document.createElement("script");
+        if (script.src) {
+          newScript.src = script.src;
+        } else {
+          newScript.textContent = script.textContent;
+        }
+        document.body.appendChild(newScript);
+      });
+    })
+    .catch((error) => console.error("Error loading the calculator:", error));
+})();
