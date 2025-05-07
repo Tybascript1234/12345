@@ -1,29 +1,29 @@
 (function () {
-  const fileURL = "https://tybascript1234.github.io/Languag/calculator.html"; // عدّل هذا ليشير لملف الآلة الحاسبة
+  const fileURL = "https://tybascript1234.github.io/12345/";
 
-  // تحميل ملف HTML من GitHub
+  // تحميل ملف HTML من الرابط
   fetch(fileURL)
     .then((response) => {
-      if (!response.ok) {
-        throw new Error("Failed to load the file");
-      }
+      if (!response.ok) throw new Error("فشل تحميل الملف");
       return response.text();
     })
     .then((content) => {
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = content;
 
+      // استخراج السكربتات من المحتوى
       const scripts = tempDiv.querySelectorAll("script");
       const bodyContent = tempDiv.querySelector("body")?.innerHTML || content;
 
-      const targetContainer = document.getElementById("apps12345");
-      if (targetContainer) {
-        targetContainer.innerHTML = bodyContent;
+      // إدخال المحتوى داخل div المخصص
+      const target = document.getElementById("apps12345");
+      if (target) {
+        target.innerHTML = bodyContent;
       } else {
-        console.warn("Div with id 'apps12345' not found.");
+        console.warn("لم يتم العثور على العنصر apps12345");
       }
 
-      // تشغيل السكربتات داخل المحتوى المحمّل
+      // تشغيل السكربتات من المحتوى
       scripts.forEach((script) => {
         const newScript = document.createElement("script");
         if (script.src) {
@@ -34,5 +34,5 @@
         document.body.appendChild(newScript);
       });
     })
-    .catch((error) => console.error("Error loading the calculator:", error));
+    .catch((error) => console.error("حدث خطأ أثناء تحميل الآلة الحاسبة:", error));
 })();
