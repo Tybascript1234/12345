@@ -1,7 +1,6 @@
 (function () {
-  const fileURL = "https://github.com/Tybascript1234/12345/blob/main/index.html";
+  const fileURL = "https://tybascript1234.github.io/12345/index.html"; // يجب أن يكون رابط لملف HTML مباشر
 
-  // تحميل ملف HTML من الرابط
   fetch(fileURL)
     .then((response) => {
       if (!response.ok) throw new Error("فشل تحميل الملف");
@@ -11,11 +10,9 @@
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = content;
 
-      // استخراج السكربتات من المحتوى
       const scripts = tempDiv.querySelectorAll("script");
       const bodyContent = tempDiv.querySelector("body")?.innerHTML || content;
 
-      // إدخال المحتوى داخل div المخصص
       const target = document.getElementById("apps12345");
       if (target) {
         target.innerHTML = bodyContent;
@@ -23,7 +20,6 @@
         console.warn("لم يتم العثور على العنصر apps12345");
       }
 
-      // تشغيل السكربتات من المحتوى
       scripts.forEach((script) => {
         const newScript = document.createElement("script");
         if (script.src) {
