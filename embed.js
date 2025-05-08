@@ -1,7 +1,6 @@
 (function () {
-  const fileURL = "https://tybascript1234.github.io/12345/calculator.html"; // مسار ملف HTML الكامل
+  const fileURL = "https://tybascript1234.github.io/12345/calculator.html";
 
-  // تحميل ملف HTML
   fetch(fileURL)
     .then((response) => {
       if (!response.ok) throw new Error("فشل تحميل الملف");
@@ -14,14 +13,11 @@
       const tempDiv = document.createElement("div");
       tempDiv.innerHTML = htmlContent;
 
-      // استخراج السكربتات
       const scripts = tempDiv.querySelectorAll("script");
       const bodyContent = tempDiv.querySelector("body")?.innerHTML || htmlContent;
 
-      // حقن HTML
       container.innerHTML = bodyContent;
 
-      // تشغيل السكربتات
       scripts.forEach((script) => {
         const newScript = document.createElement("script");
         if (script.src) {
