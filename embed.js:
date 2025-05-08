@@ -1,25 +1,27 @@
 (function () {
-  const fileURL = "https://tybascript1234.github.io/12345/index.html"; // يجب أن يكون رابط لملف HTML مباشر
+  const fileURL = "https://tybascript1234.github.io/12345/calculator.html"; // مسار ملف HTML الكامل
 
+  // تحميل ملف HTML
   fetch(fileURL)
     .then((response) => {
       if (!response.ok) throw new Error("فشل تحميل الملف");
       return response.text();
     })
-    .then((content) => {
+    .then((htmlContent) => {
+      const container = document.getElementById("apps12345");
+      if (!container) throw new Error("لم يتم العثور على العنصر target");
+
       const tempDiv = document.createElement("div");
-      tempDiv.innerHTML = content;
+      tempDiv.innerHTML = htmlContent;
 
+      // استخراج السكربتات
       const scripts = tempDiv.querySelectorAll("script");
-      const bodyContent = tempDiv.querySelector("body")?.innerHTML || content;
+      const bodyContent = tempDiv.querySelector("body")?.innerHTML || htmlContent;
 
-      const target = document.getElementById("apps12345");
-      if (target) {
-        target.innerHTML = bodyContent;
-      } else {
-        console.warn("لم يتم العثور على العنصر apps12345");
-      }
+      // حقن HTML
+      container.innerHTML = bodyContent;
 
+      // تشغيل السكربتات
       scripts.forEach((script) => {
         const newScript = document.createElement("script");
         if (script.src) {
@@ -30,5 +32,5 @@
         document.body.appendChild(newScript);
       });
     })
-    .catch((error) => console.error("حدث خطأ أثناء تحميل الآلة الحاسبة:", error));
+    .catch((err) => console.error("خطأ أثناء تحميل الآلة الحاسبة:", err));
 })();
