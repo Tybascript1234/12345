@@ -1,5 +1,5 @@
 (function () {
-  const fileURL = "https://tybascript1234.github.io/12345/";
+  const fileURL = "https://github.com/Tybascript1234/12345/blob/main/index.html";
 
   // تحميل ملف HTML من الرابط
   fetch(fileURL)
