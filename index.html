@@ -259,6 +259,7 @@
             height: 100%;
             z-index: 0;
             touch-action: none;
+            display: none; /* إضافة هذا السطر لإخفاء العنصر افتراضياً */
         }
         
         #drawing-canvas {
@@ -483,6 +484,7 @@
         let drawingHistory = [];
         let historyIndex = -1;
         let boxVisible = false;
+        const canvasContainer = document.getElementById('canvas-container');
         
         // Initialize canvas size
         function resizeCanvas() {
@@ -694,11 +696,13 @@
                 box.style.display = 'flex';
                 overlay.style.display = 'block';
                 showBtn.style.display = 'none';
+                canvasContainer.style.display = 'block'; // إظهار canvas-container
                 boxVisible = true;
             } else {
                 box.style.display = 'none';
                 overlay.style.display = 'none';
                 showBtn.style.display = 'flex';
+                canvasContainer.style.display = 'none'; // إخفاء canvas-container
                 boxVisible = false;
                 // Clear drawing when box is hidden
                 clearDrawing();
@@ -709,6 +713,7 @@
             box.style.display = 'none';
             overlay.style.display = 'none';
             showBtn.style.display = 'flex';
+            canvasContainer.style.display = 'none'; // إخفاء canvas-container
             menu.classList.remove("active");
             boxVisible = false;
             // Clear drawing when box is closed
