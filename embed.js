@@ -1,32 +1,30 @@
 (function () {
-  const fileURL = "https://tybascript1234.github.io/12345/calculator.html";
+  // تأكد من وجود div بالمعرف "embed"
+  var container = document.getElementById("embed");
+  if (!container) return;
 
-  fetch(fileURL)
-    .then((response) => {
-      if (!response.ok) throw new Error("فشل تحميل الملف");
-      return response.text();
-    })
-    .then((htmlContent) => {
-      const container = document.getElementById("apps12345");
-      if (!container) throw new Error("لم يتم العثور على العنصر target");
+  // تحميل الصفحة الرئيسية لموقعك
+  var htmlUrl = "https://tybascript1234.github.io/12345/index.html";
 
-      const tempDiv = document.createElement("div");
-      tempDiv.innerHTML = htmlContent;
+  fetch(htmlUrl)
+    .then(response => response.text())
+    .then(html => {
+      container.innerHTML = html;
 
-      const scripts = tempDiv.querySelectorAll("script");
-      const bodyContent = tempDiv.querySelector("body")?.innerHTML || htmlContent;
-
-      container.innerHTML = bodyContent;
-
-      scripts.forEach((script) => {
+      // تحميل السكريبتات بعد إدخال الـ HTML
+      const scripts = container.querySelectorAll("script");
+      scripts.forEach(oldScript => {
         const newScript = document.createElement("script");
-        if (script.src) {
-          newScript.src = script.src;
+        if (oldScript.src) {
+          newScript.src = oldScript.src;
         } else {
-          newScript.textContent = script.textContent;
+          newScript.textContent = oldScript.textContent;
         }
         document.body.appendChild(newScript);
       });
     })
-    .catch((err) => console.error("خطأ أثناء تحميل الآلة الحاسبة:", err));
+    .catch(err => {
+      container.innerHTML = "<p style='color:red'>فشل تحميل المحتوى.</p>";
+      console.error("خطأ في تحميل المحتوى:", err);
+    });
 })();
